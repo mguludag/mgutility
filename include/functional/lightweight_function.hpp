@@ -41,7 +41,7 @@ struct lightweight_function{
 #if LWFUNC_CPLUSPLUS > 201703L
     requires std::convertible_to<F, func_t>
 #endif // LWFUNC_CPLUSPLUS > 201703L
-    Invoker(F function) : function_(std::move(function))
+    lightweight_function(F function) : function_(std::move(function))
     {
 #if LWFUNC_CPLUSPLUS <= 201703L
         static_assert(std::is_convertible<F, func_t>::value, "Type 'Func' is not a function!");
