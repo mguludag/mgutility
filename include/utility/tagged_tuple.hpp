@@ -3,6 +3,9 @@
 
 #include <tuple>
 
+// This implementation taken from https://stackoverflow.com/a/13066078/10619431
+// I added set function for changing a value from tagged_tuple
+
 namespace mgutilty
 {
 template<typename... Ts> struct typelist {
