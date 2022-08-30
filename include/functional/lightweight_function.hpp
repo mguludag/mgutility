@@ -25,7 +25,8 @@ namespace mgutility
 template <typename Func>
 struct lightweight_function{
 #if LWFUNC_CPLUSPLUS > 201402L
-    using func_t = std::conditional_t<std::is_function_v<Func>, std::add_pointer_t<Func>, Func>;
+    using func_t = std::conditional_t<std::is_function_v<Func>, 
+                   std::add_pointer_t<Func>, Func>;
     
     template <typename F, typename... Args>
     using is_invocable = std::is_invocable<F, Args...>;   
@@ -35,7 +36,8 @@ struct lightweight_function{
 
     template <typename F, typename... Args>
     struct is_invocable :
-    std::is_constructible<std::function<void(Args ...)>, std::reference_wrapper<typename std::remove_reference<F>::type>>
+    std::is_constructible<std::function<void(Args ...)>, 
+    std::reference_wrapper<typename std::remove_reference<F>::type>>
     {};
 #endif
     template <typename F>
@@ -45,7 +47,10 @@ struct lightweight_function{
     lightweight_function(F function) : function_(std::move(function))
     {
 #if LWFUNC_CPLUSPLUS <= 201703L
-        static_assert(std::is_convertible<F, func_t>::value, "Type 'Func' is not a function!");
+        static_assert(std::is_convertible<F, func_t>::value, && 
+                      std::is_constructible<std::function<Func>, 
+                      std::reference_wrapper<typename std::remove_reference<F>::type>>::value, 
+                      "'mgutility::lightweight_function<Func>::function_' has incomplete type!");
 #endif // LWFUNC_CPLUSPLUS <= 201703L
     }
     
@@ -60,7 +65,29 @@ struct lightweight_function{
 #endif // LWFUNC_CPLUSPLUS > 201103L
     {
 #if LWFUNC_CPLUSPLUS <= 201703L
-        static_assert(is_invocable<func_t, Args...>::value, "Type 'Func' is not a function or cannot invoke with these arguments!");
+        static_assert(is_invocable<func_t, Args...>::value, 
+                      "Argument constraints not satisfied!");
+#endif // LWFUNC_CPLUSPLUS <= 201703L
+#if LWFUNC_CPLUSPLUS > 201402L
+        return std::invoke(function_, std::forward<Args>(args)...);
+#else
+        return function_(std::forward<Args>(args)...);
+#endif // LWFUNC_CPLUSPLUS > 201402L
+    }
+    
+    template <typename... Args>
+#if LWFUNC_CPLUSPLUS > 201703L
+    requires std::invocable<Func&, Args...>
+#endif // LWFUNC_CPLUSPLUS > 201703L
+#if LWFUNC_CPLUSPLUS > 201103L
+    inline decltype(auto) operator()(Args&&... args) const
+#else
+    inline auto operator()(Args&&... args) const -> typename std::result_of<func_t(Args&&...)>::type 
+#endif // LWFUNC_CPLUSPLUS > 201103L
+    {
+#if LWFUNC_CPLUSPLUS <= 201703L
+        static_assert(is_invocable<func_t, Args...>::value, 
+                      "Argument constraints not satisfied!");
 #endif // LWFUNC_CPLUSPLUS <= 201703L
 #if LWFUNC_CPLUSPLUS > 201402L
         return std::invoke(function_, std::forward<Args>(args)...);
