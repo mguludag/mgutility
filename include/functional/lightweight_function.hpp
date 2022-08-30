@@ -1,4 +1,3 @@
-
 #ifndef LIGHTWEIGHT_FUNC_HPP
 #define LIGHTWEIGHT_FUNC_HPP
 
@@ -9,7 +8,7 @@
 #endif
 
 #if LWFUNC_CPLUSPLUS < 201103L
-#error "mguludag::lightweight_function requires C++11 or higher!"
+#error "mgutility::lightweight_function requires C++11 or higher!"
 #endif
 
 #if LWFUNC_CPLUSPLUS >= 201103L
