@@ -11,6 +11,8 @@
 #error "mgutility::lightweight_function requires C++11 or higher!"
 #endif
 
+namespace mgutility
+{
 #if LWFUNC_CPLUSPLUS >= 201103L
 #include <type_traits>
 #include <utility>
@@ -19,8 +21,6 @@
 #include <concepts>
 #endif // LWFUNC_CPLUSPLUS > 201703L
 
-namespace mgutility
-{
 template <typename Func>
 struct lightweight_function{
 #if LWFUNC_CPLUSPLUS > 201402L
