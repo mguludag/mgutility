@@ -7,7 +7,6 @@
 
 class QAsyncObject : public QObject
 {
-    Q_OBJECT
 public:
     explicit QAsyncObject(QObject *parent = nullptr);
     virtual ~QAsyncObject();
@@ -15,8 +14,8 @@ public:
     // QObject interface
     bool event(QEvent *event) override;
 
-private slots:
-    virtual void init();
+private:
+    Q_INVOKABLE virtual void init();
 
 private:
     QThread mThread;
