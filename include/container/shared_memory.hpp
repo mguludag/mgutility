@@ -23,7 +23,7 @@
 #include <mutex>
 
 
-namespace stdx {
+namespace mgutility {
 
 template<typename T, template<typename Val, typename...> class Container = std::deque>
 class shared_memory
@@ -96,7 +96,7 @@ Container<T> shared_memory<T, Container>::m_data;
 template<typename T, template<typename Val, typename...> class Container = std::deque>
 std::mutex shared_memory<T, Container>::m_mtx;
 
-} // namespace stdx
+} // namespace mgutility
 
 
 #endif // SHARED_MEMORY_HPP

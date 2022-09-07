@@ -7,7 +7,7 @@
 class QObject;
 class QThread;
 
-namespace stdx {
+namespace mgutility {
 namespace qt {
 namespace _details {
 template<typename T>
@@ -63,6 +63,6 @@ shared_ptr<T> make_shared(Ts&&... args) {
     return shared_ptr<T>(new T(std::forward<Ts>(args)...), _details::q_deleter<T>());
 }
 } // namespace qt
-} // namespace stdx
+} // namespace mgutility
 
 #endif // QMEMORY_HPP
