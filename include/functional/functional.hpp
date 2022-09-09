@@ -47,7 +47,7 @@ struct function{
     function(F function) : function_(std::move(function))
     {
 #if FUNCTIONAL_CPLUSPLUS_VER <= 201703L
-        static_assert(std::is_convertible<F, func_t>::value, && 
+        static_assert(std::is_convertible<F, func_t>::value && 
                       std::is_constructible<std::function<Func>, 
                       std::reference_wrapper<typename std::remove_reference<F>::type>>::value, 
                       "'mgutility::function<Func>::function_' has incomplete type!");
