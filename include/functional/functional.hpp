@@ -59,7 +59,7 @@ struct function{
     requires std::invocable<Func&, Args...>
 #endif // FUNCTIONAL_CPLUSPLUS_VER > 201703L
 
-    inline operator()(Args&&... args)
+    inline auto operator()(Args&&... args)
 #if FUNCTIONAL_CPLUSPLUS_VER > 201103L
     -> decltype(auto)
 #else // FUNCTIONAL_CPLUSPLUS_VER == 201103L
@@ -82,7 +82,7 @@ struct function{
     requires std::invocable<Func&, Args...>
 #endif // FUNCTIONAL_CPLUSPLUS_VER > 201703L
 
-inline operator()(Args&&... args) const 
+    inline auto operator()(Args&&... args) const 
 #if FUNCTIONAL_CPLUSPLUS_VER > 201103L
     -> decltype(auto)
 #else // FUNCTIONAL_CPLUSPLUS_VER == 201103L
