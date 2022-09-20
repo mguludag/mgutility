@@ -39,6 +39,32 @@ private:
 };
 
 template <typename T> typename singleton<T>::Storage singleton<T>::storage_;
+    
+// its a CRTP base class for change child class to singleton
+template <typename T>
+class singleton_from_this
+{
+    public:
+    singleton_from_this(T* t)
+    {
+        struct static_creator {
+        static_creator(T* ptr) {
+                instance_ = ptr;
+            }
+        };
+        static static_creator _creator(t);
+    }
+
+    static T* instance() {
+        return instance_;
+    }
+
+
+    private:
+    static T* instance_;
+};
+
+template <typename T> T* singleton_from_this<T>::instance_{nullptr};
 
 }
 
