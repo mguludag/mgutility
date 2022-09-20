@@ -3,6 +3,9 @@
 
 #include <memory>
 
+// original implementation linked here: https://oguzhankatli.medium.com/dogru-singleton-tasarimi-3f5c10bac6c7
+// I modified the implementation using std::aligned_storage instead of pointers and heap
+
 namespace mgutility
 {
 template <typename T>
