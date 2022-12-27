@@ -30,23 +30,32 @@ class shared_memory
 {
 public:
     shared_memory() {}
+    
+    shared_memory(size_t reserve) 
+    {
+        static_assert(std::is_member_function_pointer<decltype(&Container::reserve)>::value,
+                  "Container::reserve member function is required!");
+        m_data.reserve(reserve);
+    }
 
     /*!
      * \brief at function returns item in shared memory with given index
      * \param index
      * \return T&
      */
-    static T &at(int index)
+    static T at(int index)
     {
+        static_assert(std::is_member_function_pointer<decltype(&Container::at)>::value,
+                  "Container::at member function is required!"); 
         std::lock_guard<std::mutex> guard(m_mtx);
         return m_data.at(index);
     }
 
     /*!
      * \brief data function returns the container that used in shared memory
-     * \return Container<T>&
+     * \return Container<T>
      */
-    static Container<T> &data()
+    static Container<T> data()
     {
         std::lock_guard<std::mutex> guard(m_mtx);
         return m_data;
@@ -59,6 +68,20 @@ public:
      */
     static void push_back(const T &data)
     {
+        static_assert(std::is_member_function_pointer<decltype(&Container::push_back)>::value,
+                  "Container::push_back member function is required!"); 
+        std::lock_guard<std::mutex> guard(m_mtx);
+        m_data.push_back(data);
+    }
+    
+        /*!
+     * \brief push_back function adds the element at the last position in the shared memory
+     * \param data
+     */
+    static void push_back(T &&data)
+    {
+        static_assert(std::is_member_function_pointer<decltype(&Container::push_back)>::value,
+                  "Container::push_back member function is required!"); 
         std::lock_guard<std::mutex> guard(m_mtx);
         m_data.push_back(data);
     }
@@ -68,16 +91,22 @@ public:
      */
     static void clear()
     {
+        static_assert(std::is_member_function_pointer<decltype(&Container::clear)>::value,
+                  "Container::clear member function is required!"); 
         std::lock_guard<std::mutex> guard(m_mtx);
         m_data.clear();
     }
 
     /*!
      * \brief pop_front pops and return the first element from the shared memory
-     * \return T&
+     * \return T
      */
-    static T &pop_front()
+    static T pop_front()
     {
+        static_assert(std::is_member_function_pointer<decltype(&Container::at)>::value,
+                  "Container::at member function is required!"); 
+        static_assert(std::is_member_function_pointer<decltype(&Container::erase)>::value,
+                  "Container::erase member function is required!");
         std::lock_guard<std::mutex> guard(m_mtx);
         auto data = m_data.at(0);
         m_data.erase(0);
