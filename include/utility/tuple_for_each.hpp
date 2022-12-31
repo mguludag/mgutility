@@ -5,7 +5,7 @@
 
 #if __cplusplus > 201103L
 
-namespace mgutilty
+namespace mgutility
 {
   namespace tuple
   {
