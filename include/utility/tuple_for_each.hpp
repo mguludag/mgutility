@@ -3,30 +3,57 @@
 
 #include <tuple>
 
-#if __cplusplus > 201103L
+#if __cplusplus == 201103L
 
-namespace mgutility
-{
-  namespace tuple
-  {
-    template<typename T, std::size_t N>
-    struct tuple_element { T& value; static constexpr auto index = N; };
+#define CNSTXPR
 
-    template <typename ...Ts, class F, std::size_t... Is>
-    constexpr inline void __for_each_impl(std::tuple<Ts...> t, F func, std::index_sequence<Is...>)
-    {
-      using expander = int[];
-      static_cast<void>(expander{0, (func(tuple_element<decltype(std::get<Is>(t)), Is>{std::get<Is>(t)}), 0)...});
+namespace mgutility{
+    namespace detail{
+        template <std::size_t ...>
+        struct index_sequence{};
+
+        template <std::size_t N, std::size_t ... Next>
+        struct index_sequence_helper : public index_sequence_helper<N-1U, N-1U, Next...>{};
+
+        template <std::size_t ... Next>
+        struct index_sequence_helper<0U, Next ... >{ using type = index_sequence<Next ... >; };
+
+        template <std::size_t N>
+        using make_index_sequence = typename index_sequence_helper<N>::type;
     }
+}
 
-    template <typename ...Ts, typename F>
-    constexpr inline void for_each(std::tuple<Ts...> t, F func)
-    {
-      __for_each_impl(t, func, std::make_index_sequence<std::tuple_size<decltype(t)>::value>());
+#elif __cplusplus > 201103L
+
+#define CNSTXPR constexpr
+
+namespace mgutility{
+    namespace detail{
+        using std::index_sequence;
+        using std::make_index_sequence;
     }
-  }
 }
 
 #endif
+
+namespace mgutility{
+  namespace tuple{
+    template<typename T>
+    struct element { const size_t index; T& value; };
+
+    template <typename F, std::size_t... Is, typename ...Ts, template <typename...> class Tuple>
+    CNSTXPR inline void __for_each_impl(Tuple<Ts...> t, F func, detail::index_sequence<Is...>)
+    {
+      using expander = int[];
+      (void)expander{0, (func(element<Ts>{Is, std::get<Is>(t)}), 0)...};
+    }
+
+    template <typename F, typename ...Ts, template <typename...> class Tuple>
+    CNSTXPR inline void for_each(Tuple<Ts...> t, F func)
+    {
+      __for_each_impl(t, func, detail::make_index_sequence<sizeof...(Ts)>());
+    }
+  }
+}
 
 #endif
