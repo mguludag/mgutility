@@ -47,7 +47,7 @@ class singleton_from_this
 public:
     template <typename ...Ts>
     static void init_instance(Ts&& ...args) {
-        static_assert(std::is_constructible<T, Ts...>::value, "Cannot construct instance with these arguments!");
+        static_assert(std::is_constructible<T, Ts...>::value, "Cannot contruct instance with these arguments!");
         struct static_creator
         {
             static_creator(Ts&& ...args){
@@ -56,12 +56,20 @@ public:
                 instance_ = &instance_l;
             }
         };
-
         static static_creator creator(std::forward<Ts>(args)...);
         
     }
 
+    template <typename U = T,
+              typename std::enable_if<!std::is_default_constructible<U>::value, bool>::type = false>
     static T &instance() {
+        return *instance_;
+    }
+
+    template <typename U = T,
+              typename std::enable_if<std::is_default_constructible<U>::value, bool>::type = true>
+    static T &instance() {
+        init_instance();
         return *instance_;
     }
 
