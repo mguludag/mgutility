@@ -63,6 +63,7 @@ public:
     template <typename U = T,
               typename std::enable_if<!std::is_default_constructible<U>::value, bool>::type = false>
     static T &instance() {
+        static_assert(std::is_default_constructible<U>::value, "Cannot contruct instance with default ctor!");
         return *instance_;
     }
 
