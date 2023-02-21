@@ -44,24 +44,33 @@ template <typename T> typename singleton<T>::Storage singleton<T>::storage_;
 template <typename T>
 class singleton_from_this
 {
-    public:
-    singleton_from_this(T* t)
-    {
-        struct static_creator {
-        static_creator(T* ptr) {
-                instance_ = ptr;
+public:
+    template <typename ...Ts>
+    static void init_instance(Ts&& ...args) {
+        struct static_creator
+        {
+            static_creator(Ts&& ...args){
+                static T instance_l{std::forward<Ts>(args)...};
+                instance_ = &instance_l;
             }
         };
-        static static_creator _creator(t);
+
+        static static_creator creator(std::forward<Ts>(args)...);
+        
     }
 
-    static T* instance() {
-        return instance_;
+    static T &instance() {
+        return *instance_;
     }
 
+    template <typename TT, typename ...TTs>
+    static T &instance(TT&& arg, TTs&& ...args) {
+        init_instance(std::forward<TT>(arg), std::forward<TTs>(args)...);
+        return *instance_;
+    }
 
-    private:
-    static T* instance_;
+private:
+static T* instance_;
 };
 
 template <typename T> T* singleton_from_this<T>::instance_{nullptr};
