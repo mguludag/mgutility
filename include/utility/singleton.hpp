@@ -47,6 +47,7 @@ class singleton_from_this
 public:
     template <typename ...Ts>
     static void init_instance(Ts&& ...args) {
+        static_assert(std::is_constructible<T, Ts...>::value, "Cannot construct instance with these arguments!");
         struct static_creator
         {
             static_creator(Ts&& ...args){
