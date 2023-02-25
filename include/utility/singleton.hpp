@@ -2,6 +2,7 @@
 #define MGUTILITY_SINGLETON_HPP
 
 #include <memory>
+#include <type_traits>
 
 // original implementation linked here: https://oguzhankatli.medium.com/dogru-singleton-tasarimi-3f5c10bac6c7
 // I modified the implementation using std::aligned_storage instead of pointers and heap
@@ -40,6 +41,13 @@ private:
 
 template <typename T> typename singleton<T>::Storage singleton<T>::storage_;
     
+    
+template <template <typename ...Ts> class Trait, typename ...TTs>
+using requires_t = typename std::enable_if<Trait<typename std::remove_reference<TTs>::type...>::value, bool>::type;
+
+template <template <typename ...Ts> class Trait, typename ...TTs>
+using not_requires_t = typename std::enable_if<!Trait<typename std::remove_reference<TTs>::type...>::value, bool>::type;
+    
 // its a CRTP base class for change child class to singleton
 template <typename T>
 class singleton_from_this
@@ -60,14 +68,12 @@ public:
         
     }
 
-    template <typename U = T,
-              typename std::enable_if<!std::is_default_constructible<U>::value, bool>::type = false>
+    template <typename U = T, not_requires_t<std::is_default_constructible, U> = true>
     static T &instance() {
         return *instance_;
     }
 
-    template <typename U = T,
-              typename std::enable_if<std::is_default_constructible<U>::value, bool>::type = true>
+    template <typename U = T, requires_t<std::is_default_constructible, U> = true>
     static T &instance() {
         init_instance();
         return *instance_;
