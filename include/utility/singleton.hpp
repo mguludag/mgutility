@@ -63,9 +63,9 @@ public:
         struct static_creator
         {
             static_creator(Ts&& ...args){
-                if(instance_ != nullptr) return;
                 static T instance_l{std::forward<Ts>(args)...};
-                instance_ = &instance_l;
+                static auto f{[&]{ instance_ = &instance_l; }};
+                f();
             }
         };
         static static_creator creator(std::forward<Ts>(args)...);
