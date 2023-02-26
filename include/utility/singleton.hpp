@@ -53,6 +53,10 @@ template <typename T>
 class singleton_from_this
 {
 public:
+    singleton_from_this(){}
+    singleton_from_this(const singleton_from_this&) = delete;
+    singleton_from_this& operator=(const singleton_from_this&) = delete;
+    
     template <typename ...Ts>
     static void init_instance(Ts&& ...args) {
         static_assert(std::is_constructible<T, Ts...>::value, "Cannot contruct instance with these arguments!");
