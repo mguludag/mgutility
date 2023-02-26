@@ -60,16 +60,12 @@ public:
     template <typename ...Ts>
     static void init_instance(Ts&& ...args) {
         static_assert(std::is_constructible<T, Ts...>::value, "Cannot contruct instance with these arguments!");
-        struct static_creator
-        {
-            static_creator(Ts&& ...args){
-                static T instance_l{std::forward<Ts>(args)...};
+        static auto static_creator{[](Ts&& ...args){
+            static T instance_l{std::forward<Ts>(args)...};
                 static auto f{[&]{ instance_ = &instance_l; }};
                 f();
-            }
-        };
-        static static_creator creator(std::forward<Ts>(args)...);
-        
+        }};
+        static_creator(std::forward<Ts>(args)...);
     }
 
     template <typename U = T, not_requires_t<std::is_default_constructible, U> = true>
