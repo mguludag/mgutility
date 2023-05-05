@@ -95,8 +95,8 @@ static T* instance_;
 static std::once_flag flag_;
 };
 
-template <typename T> T* singleton_from_this<T>::instance_{nullptr};
-template <typename T> std::once_flag singleton_from_this<T>::flag_;
+template <typename T> T* enable_singleton_from_this<T>::instance_{nullptr};
+template <typename T> std::once_flag enable_singleton_from_this<T>::flag_;
 
 }
 
