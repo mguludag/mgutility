@@ -2,6 +2,7 @@
 #define MGUTILITY_SINGLETON_HPP
 
 #include <memory>
+#include <mutex>
 #include <type_traits>
 
 // original implementation linked here: https://oguzhankatli.medium.com/dogru-singleton-tasarimi-3f5c10bac6c7
@@ -50,12 +51,12 @@ using not_requires_t = typename std::enable_if<!Trait<typename std::remove_refer
     
 // its a CRTP base class for change child class to singleton
 template <typename T>
-class singleton_from_this
+class enable_singleton_from_this
 {
 public:
-    singleton_from_this(){}
-    singleton_from_this(const singleton_from_this&) = delete;
-    singleton_from_this& operator=(const singleton_from_this&) = delete;
+    enable_singleton_from_this(){}
+    enable_singleton_from_this(const singleton_from_this&) = delete;
+    enable_singleton_from_this& operator=(const singleton_from_this&) = delete;
     
     template <typename ...Ts>
     static void init_instance(Ts&& ...args) {
@@ -63,9 +64,10 @@ public:
         struct static_creator
         {
             inline static_creator(Ts&& ...args){
-                if(instance_) return;
-                static T instance_l{std::forward<Ts>(args)...};
-                instance_ = &instance_l;
+                std::call_once(flag_, [&]{
+                    static T instance_l{std::forward<Ts>(args)...};
+                    instance_ = &instance_l;
+                });
             }
         };
         static static_creator creator(std::forward<Ts>(args)...);
@@ -90,9 +92,11 @@ public:
 
 private:
 static T* instance_;
+static std::once_flag flag_;
 };
 
 template <typename T> T* singleton_from_this<T>::instance_{nullptr};
+template <typename T> std::once_flag singleton_from_this<T>::flag_;
 
 }
 
