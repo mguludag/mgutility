@@ -55,8 +55,8 @@ class enable_singleton_from_this
 {
 public:
     enable_singleton_from_this(){}
-    enable_singleton_from_this(const singleton_from_this&) = delete;
-    enable_singleton_from_this& operator=(const singleton_from_this&) = delete;
+    enable_singleton_from_this(const enable_singleton_from_this&) = delete;
+    enable_singleton_from_this& operator=(const enable_singleton_from_this&) = delete;
     
     template <typename ...Ts>
     static void init_instance(Ts&& ...args) {
