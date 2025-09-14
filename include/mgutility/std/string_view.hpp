@@ -89,7 +89,7 @@ MGUTILITY_CNSTXPR int strncmp_constexpr(const char *lhs, const char *rhs,
 
 template <typename Range, typename Pred>
 MGUTILITY_CNSTXPR auto find(const Range &rng, const Pred &pred) -> size_t {
-  for (int i = 1; i < rng.size(); ++i) {
+  for (size_t i = 1; i < rng.size(); ++i) {
     if (pred == rng[i]) {
       return i;
     }
