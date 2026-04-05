@@ -63,7 +63,7 @@ public:
     }
 
   MGUTILITY_CNSTXPR fixed_string(mgutility::string_view str)
-        : fixed_string(str.begin(), str.size()) {}
+        : fixed_string(str.data(), str.size()) {}
 
   // Constructor to initialize from a string literal
   // NOLINTNEXTLINE [cppcoreguidelines-avoid-c-arrays]
