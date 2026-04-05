@@ -26,10 +26,13 @@ SOFTWARE.
 #define MGUTILITY_FIXED_STRING_HPP
 
 #include "mgutility/std/string_view.hpp"
+#include "mgutility/std/utility.hpp"
 
 namespace mgutility {
 
 template <size_t N = 0> class fixed_string {
+  template <size_t>
+  friend class fixed_string;
 public:
   template <size_t M>
   // NOLINTNEXTLINE [cppcoreguidelines-avoid-c-arrays]
@@ -38,6 +41,29 @@ public:
   }
 
   MGUTILITY_CNSTXPR fixed_string() = default;
+
+  // --- safe pack expansion (no OOB) ---
+  template <std::size_t M, std::size_t... Is>
+  constexpr fixed_string(const char (&str)[M], detail::index_sequence<Is...>)
+      : data{(Is < M ? str[Is] : '\0')...}, cursor(M ? M - 1 : 0) {}
+
+  // single literal constructor (handles all M)
+  template <std::size_t M>
+  constexpr fixed_string(const char (&str)[M])
+      : fixed_string(str, typename detail::make_index_sequence<N>{}) {}
+
+  MGUTILITY_CNSTXPR fixed_string(const char* str, std::size_t len)
+      : data{},
+          cursor(len < N ? len
+                 : N     ? N - 1
+                         : 0) {
+        for (std::size_t i = 0; i < N; ++i) {
+            data[i] = (i < len) ? str[i] : '\0';
+        }
+    }
+
+  MGUTILITY_CNSTXPR fixed_string(mgutility::string_view str)
+        : fixed_string(str.begin(), str.size()) {}
 
   // Constructor to initialize from a string literal
   // NOLINTNEXTLINE [cppcoreguidelines-avoid-c-arrays]
@@ -55,15 +81,15 @@ public:
       -> fixed_string<N + M - 1> {
     fixed_string<N + M - 1> result{};
     size_t idx = 0;
-    for (; idx < N - 1; ++idx) {
+    for (; idx < cursor; ++idx) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
       result.data[idx] = data[idx];
     }
-    for (size_t j = 0; j < M; ++j) {
+    for (size_t j = 0; j < other.size(); ++j) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
       result.data[idx + j] = other.data[j];
     }
-    result.cursor = N + M - 2;
+    result.cursor = cursor + other.size();
     // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
     result.data[result.cursor] = '\0';
     return result;
