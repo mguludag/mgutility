@@ -31,8 +31,8 @@ SOFTWARE.
 namespace mgutility {
 
 template <size_t N = 0> class fixed_string {
-  template <size_t>
-  friend class fixed_string;
+  template <size_t> friend class fixed_string;
+
 public:
   template <size_t M>
   // NOLINTNEXTLINE [cppcoreguidelines-avoid-c-arrays]
@@ -45,34 +45,33 @@ public:
   // --- safe pack expansion (no OOB) ---
   template <std::size_t M, std::size_t... Is>
   constexpr fixed_string(const char (&str)[M], detail::index_sequence<Is...>)
-      : data{(Is < M ? str[Is] : '\0')...}, cursor(M ? M - 1 : 0) {}
+      : data_{(Is < M ? str[Is] : '\0')...}, cursor_(M ? M - 1 : 0) {}
 
   // single literal constructor (handles all M)
   template <std::size_t M>
   constexpr fixed_string(const char (&str)[M])
       : fixed_string(str, typename detail::make_index_sequence<N>{}) {}
 
-  MGUTILITY_CNSTXPR fixed_string(const char* str, std::size_t len)
-      : data{},
-          cursor(len < N ? len
-                 : N     ? N - 1
-                         : 0) {
-        for (std::size_t i = 0; i < N; ++i) {
-            data[i] = (i < len) ? str[i] : '\0';
-        }
+  MGUTILITY_CNSTXPR fixed_string(const char *str, std::size_t len)
+      : data_{}, cursor_(len < N ? len
+                         : N     ? N - 1
+                                 : 0) {
+    for (std::size_t i = 0; i < N; ++i) {
+      data_[i] = (i < len) ? str[i] : '\0';
     }
+  }
 
   MGUTILITY_CNSTXPR fixed_string(mgutility::string_view str)
-        : fixed_string(str.data(), str.size()) {}
+      : fixed_string(str.data(), str.size()) {}
 
   // Constructor to initialize from a string literal
   // NOLINTNEXTLINE [cppcoreguidelines-avoid-c-arrays]
   MGUTILITY_CNSTXPR explicit fixed_string(const char (&str)[N]) {
     for (size_t i = 0; i < N - 1; ++i) {
-      data[i] = str[i];
+      data_[i] = str[i];
     }
-    cursor = N - 1;
-    data[cursor] = '\0';
+    cursor_ = N - 1;
+    data_[cursor_] = '\0';
   }
 
   // Concatenation operator
@@ -81,17 +80,17 @@ public:
       -> fixed_string<N + M - 1> {
     fixed_string<N + M - 1> result{};
     size_t idx = 0;
-    for (; idx < cursor; ++idx) {
+    for (; idx < cursor_; ++idx) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-      result.data[idx] = data[idx];
+      result.data_[idx] = data_[idx];
     }
     for (size_t j = 0; j < other.size(); ++j) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-      result.data[idx + j] = other.data[j];
+      result.data_[idx + j] = other.data_[j];
     }
-    result.cursor = cursor + other.size();
+    result.cursor_ = cursor_ + other.size();
     // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-    result.data[result.cursor] = '\0';
+    result.data_[result.cursor_] = '\0';
     return result;
   }
 
@@ -110,53 +109,55 @@ public:
                   "Capacity needs to be greater than string to be appended!");
     for (size_t i = 0; i < M - 1; ++i) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-      data[cursor++] = str[i];
+      data_[cursor_++] = str[i];
     }
     // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-    data[cursor] = '\0';
+    data_[cursor_] = '\0';
     return *this;
   }
 
   MGUTILITY_CNSTXPR auto append(string_view str) -> fixed_string<N> & {
     for (const char chr : str) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-      data[cursor++] = chr;
+      data_[cursor_++] = chr;
     }
     // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-    data[cursor] = '\0';
+    data_[cursor_] = '\0';
     return *this;
   }
 
   MGUTILITY_CNSTXPR auto pop_back() -> void {
-    if (cursor > 0) {
+    if (cursor_ > 0) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-      data[--cursor] = '\0';
+      data_[--cursor_] = '\0';
     }
   }
 
-  MGUTILITY_CNSTXPR auto size() const -> size_t { return cursor; }
+  MGUTILITY_CNSTXPR auto size() const -> size_t { return cursor_; }
 
   // NOLINTNEXTLINE [readability-identifier-length]
   constexpr size_t find(char c, size_t pos = 0) const noexcept {
     // NOLINTNEXTLINE [readability-avoid-nested-conditional-operator]
-    return c == data[pos] ? pos : (pos < cursor ? find(c, ++pos) : npos);
+    return c == data_[pos] ? pos : (pos < cursor_ ? find(c, ++pos) : npos);
   }
 
   // Conversion to std::string_view for easy printing
   // NOLINTNEXTLINE[google-explicit-constructor]
   MGUTILITY_CNSTXPR operator string_view() const {
-    return string_view(data, cursor);
+    return string_view(data_, cursor_);
   }
 
   MGUTILITY_CNSTXPR auto view() const -> string_view {
-    return string_view(data, cursor);
+    return string_view(data_, cursor_);
   }
 
-  constexpr bool empty() const noexcept { return cursor == 0; }
+  constexpr const char *data() const noexcept { return data_; }
+
+  constexpr bool empty() const noexcept { return cursor_ == 0; }
 
   constexpr const char &operator[](size_t index) const noexcept {
     // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-    return data[index];
+    return data_[index];
   }
 
   MGUTILITY_CNSTXPR inline bool operator==(const char *rhs) const {
@@ -166,9 +167,9 @@ public:
   // NOLINTNEXTLINE [readability-identifier-length]
   friend std::ostream &operator<<(std::ostream &os,
                                   const fixed_string<N> &str) {
-    for (size_t i = 0; i < str.cursor; ++i) {
+    for (size_t i = 0; i < str.cursor_; ++i) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-      os << str.data[i];
+      os << str.data_[i];
     }
     return os;
   }
@@ -177,8 +178,8 @@ public:
 
 private:
   // NOLINTNEXTLINE [cppcoreguidelines-avoid-c-arrays]
-  char data[N]{'\0'};
-  size_t cursor{};
+  char data_[N]{'\0'};
+  size_t cursor_{};
 };
 
 } // namespace mgutility
