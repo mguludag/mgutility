@@ -207,6 +207,20 @@ public:
   constexpr const Char *end() const noexcept { return (data_ + size_); }
 
   /**
+   * @brief Returns a reference to the first character.
+   *
+   * @return A reference to the first character.
+   */
+  constexpr const Char &front() const noexcept { return data_[0]; }
+
+  /**
+   * @brief Returns a reference to the last character.
+   *
+   * @return A reference to the last character.
+   */
+  constexpr const Char &back() const noexcept { return data_[size_ - 1]; }
+
+  /**
    * @brief Checks if the string is empty.
    *
    * @return True if the string is empty, otherwise false.
@@ -249,12 +263,21 @@ public:
    */
   // NOLINTNEXTLINE [readability-identifier-length]
   constexpr size_t rfind(Char c, size_t pos = npos) const noexcept {
+#if MGUTILITY_CPLUSPLUS < 201402L
     // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-pointer-arithmetic]
     return (pos == npos ? pos = size_ : pos = pos),
            c == data_[pos] ? pos
            // NOLINTNEXTLINE [readability-avoid-nested-conditional-operator]
            : pos == 0U ? npos
                        : rfind(c, --pos);
+#else
+    for (size_t i = (pos == npos ? size_ : pos) - 1; i < size_; --i) {
+      if (data_[i] == c) {
+        return i;
+      }
+    }
+    return npos;
+#endif
   }
 
   /**
@@ -266,8 +289,17 @@ public:
    */
   // NOLINTNEXTLINE [readability-identifier-length]
   constexpr size_t find(Char c, size_t pos = 0) const noexcept {
+#if MGUTILITY_CPLUSPLUS < 201402L
     // NOLINTNEXTLINE [readability-avoid-nested-conditional-operator]
     return c == data_[pos] ? pos : pos < size_ ? find(c, ++pos) : npos;
+#else
+    for (size_t i = pos; i < size_; ++i) {
+      if (data_[i] == c) {
+        return i;
+      }
+    }
+    return npos;
+#endif
   }
 
   /**
