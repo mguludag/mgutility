@@ -249,9 +249,9 @@ public:
    * @return A basic_string_view representing the substring.
    */
   constexpr basic_string_view<Char> substr(size_t begin,
-                                           size_t len = 0U) const noexcept {
+                                           size_t len = npos) const noexcept {
     return basic_string_view<Char>(data_ + begin,
-                                   len == 0U ? size_ - begin : len);
+                                   len == npos ? size_ - begin : len);
   }
 
   /**
