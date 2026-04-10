@@ -117,9 +117,10 @@ public:
   }
 
   MGUTILITY_CNSTXPR auto append(string_view str) -> fixed_string<N> & {
-    for (const char chr : str) {
+    auto len = str.size() > N - cursor_ ? N - cursor_ : str.size();
+    for (std::size_t i = 0; i < len; ++i) {
       // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
-      data_[cursor_++] = chr;
+      data_[cursor_++] = str[i];
     }
     // NOLINTNEXTLINE [cppcoreguidelines-pro-bounds-constant-array-index]
     data_[cursor_] = '\0';
